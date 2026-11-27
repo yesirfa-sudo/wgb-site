@@ -121,7 +121,22 @@
     const tpl = card.querySelector('template[data-product-desc]');
     product.title.textContent = d.name;
     product.body.textContent = '';
-    if (img && img.getAttribute('src')) product.body.appendChild(el('div', { class: 'wgb-modal__image' }, [el('img', { src: img.getAttribute('src'), alt: '' })]));
+    const pics = (d.images || '').split('|').filter(Boolean);
+    if (!pics.length && img && img.getAttribute('src')) pics.push(img.getAttribute('src'));
+    if (pics.length) {
+      const big = el('img', { src: pics[0], alt: d.name, decoding: 'async' });
+      const gallery = el('div', { class: 'wgb-modal__gallery' }, [el('div', { class: 'wgb-modal__image' }, [big])]);
+      if (pics.length > 1) {
+        const bar = el('div', { class: 'wgb-thumbs', role: 'group', 'aria-label': 'Product images' });
+        pics.forEach((src, i) => {
+          const t = el('button', { type: 'button', class: 'wgb-thumb', 'aria-label': 'Image ' + (i + 1) + ' of ' + pics.length, 'aria-current': i === 0 ? 'true' : 'false' }, [el('img', { src: src, alt: '', loading: 'lazy', decoding: 'async' })]);
+          t.addEventListener('click', () => { big.src = src; bar.querySelectorAll('.wgb-thumb').forEach((x) => x.setAttribute('aria-current', String(x === t))); });
+          bar.appendChild(t);
+        });
+        gallery.appendChild(bar);
+      }
+      product.body.appendChild(gallery);
+    }
     const desc = el('div', { class: 'wgb-modal__desc text-content' });
     if (tpl) desc.appendChild(tpl.content.cloneNode(true));
     product.body.appendChild(desc);
@@ -166,7 +181,7 @@
     }
     const list = el('ul', { class: 'wgb-cart__list' });
     cart.items.forEach((item) => {
-      const thumb = el('div', { class: 'wgb-cart__thumb' }, item.image ? [el('img', { src: item.image, alt: '' })] : []);
+      const thumb = el('div', { class: 'wgb-cart__thumb' }, item.image ? [el('img', { src: item.image, alt: item.name, loading: 'lazy' })] : []);
       const meta = el('p', { class: 'wgb-cart__meta', text: label.qty + ' ' + item.qty + ' | ' + item.price });
       const info = el('div', { class: 'wgb-cart__info' }, [el('p', { class: 'wgb-cart__name', text: item.name }), meta]);
       const update = el('button', { type: 'button', class: 'btn btn-secondary btn-small', text: label.update, disabled: item.fixed });
@@ -231,6 +246,8 @@
     const set = (o) => { menu.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o)); };
     btn.addEventListener('click', () => set(!menu.classList.contains('open')));
     menu.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('open')) { set(false); btn.focus(); } });
+    document.addEventListener('click', (e) => { if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) set(false); });
   }
   const cards = Array.from(document.querySelectorAll('.store-product'));
   const input = document.querySelector('[data-search]');

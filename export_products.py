@@ -7,7 +7,8 @@ Then:   git add -A && git commit -m "update products" && git push   (GitHub Page
 If the catalog has fewer than MIN_PRODUCTS active products, sample products are appended so the
 storefront never looks empty (use --no-samples to disable). No secrets are read or written.
 """
-import argparse, html, json, os, shutil, sqlite3, sys
+import argparse, html, json, os, sqlite3, sys
+from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DB = os.environ.get("WGB_DB", "/workspace/wgb-telegram-bot/data/catalog.sqlite3")
@@ -17,6 +18,20 @@ MIN_PRODUCTS = 9
 SAMPLE_PRICES = [4.99, 9.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99]
 e = html.escape
 money = lambda v: "$%.2f" % v
+
+MAX_W = 800          # display size is <= ~760 css px wide at 1x; keeps files ~150-250KB
+MAX_RATIO = 1.25     # very tall images are centre-cropped (the site shows a centred "cover" crop anyway)
+
+def optimize(src, dest):
+    """Resize + recompress a product image to a web-friendly JPEG at dest."""
+    im = Image.open(src).convert("RGB")
+    w, h = im.size
+    if w > MAX_W:
+        im = im.resize((MAX_W, round(h * MAX_W / w)), Image.LANCZOS); w, h = im.size
+    if h > w * MAX_RATIO:
+        top = (h - round(w * MAX_RATIO)) // 2
+        im = im.crop((0, top, w, top + round(w * MAX_RATIO)))
+    im.save(dest, "JPEG", quality=80, optimize=True, progressive=True)
 
 def placeholder(i):
     return "placeholders/placeholder-%d.jpg" % ((int(i) - 1) % 7 + 1)
@@ -32,8 +47,8 @@ def read_catalog(db):
         for im in c.execute("SELECT local_path FROM product_images WHERE product_id=? ORDER BY position, id", (r["id"],)):
             lp = im["local_path"]
             if lp and os.path.exists(lp):
-                dest = "images/" + os.path.basename(lp)
-                shutil.copyfile(lp, os.path.join(HERE, dest)); imgs.append(dest)
+                dest = "images/" + os.path.splitext(os.path.basename(lp))[0] + ".jpg"
+                optimize(lp, os.path.join(HERE, dest)); imgs.append(dest)
         out.append({"id": "p%d" % r["id"], "name": r["name"], "price": round((r["price_cents"] or 0) / 100, 2),
                     "description": r["description"] or "", "category": r["category"] or "", "images": imgs, "sample": False})
     return out
@@ -67,21 +82,22 @@ TGSVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d
 
 def card(p):
     desc = "".join("<p>%s</p>" % e(x) for x in p["description"].split("\n") if x.strip()) or "<p>Message us on Telegram to order.</p>"
-    return f"""<article class="store-product reveal" data-product data-simple="1" data-id="{e(p['id'])}" data-identifier="{e(p['id'])}" data-name="{e(p['name'])}" data-price="{p['price']}" data-price-text="{money(p['price'])}" data-fixed-qty="0">
+    return f"""<article class="store-product reveal" data-product data-simple="1" data-id="{e(p['id'])}" data-identifier="{e(p['id'])}" data-name="{e(p['name'])}" data-price="{p['price']}" data-price-text="{money(p['price'])}" data-fixed-qty="0" data-images="{e('|'.join(p['images']))}">
 <a class="card-link" href="#" aria-label="{e(p['name'])}, {money(p['price'])}" data-product-open>
-<div class="product-image"><img src="{e(p['images'][0])}" alt="" loading="lazy" width="640" height="360"></div>
+<div class="product-image"><img src="{e(p['images'][0])}" alt="{e(p['name'])}" loading="lazy" decoding="async" width="640" height="360"></div>
 <div class="product-body"><h3 class="product-title">{e(p['name'])}</h3>
 <div class="product-meta"><span class="product-buy">Purchase</span><span class="price-pill">{money(p['price'])} <span class="arrow" aria-hidden="true">&#8599;</span></span></div></div></a>
 <template data-product-desc>{desc}</template></article>"""
 
 def chip(p):
-    return f'<div class="chip"><img src="{e(p["images"][0])}" alt="" loading="lazy"><b>{e(p["name"])}</b></div>'
+    return f'<div class="chip"><img src="{e(p["images"][0])}" alt="{e(p["name"])}" loading="lazy" decoding="async"><b>{e(p["name"])}</b></div>'
 
 def page(prods):
     cards = "".join(card(p) for p in prods)
     strip = "".join(chip(p) for p in prods)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{TITLE} | Digital products</title><meta name="description" content="Browse the {TITLE} catalog and order through Telegram."><meta name="theme-color" content="#060709">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="icon" href="favicon.ico" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head>
@@ -100,7 +116,7 @@ def page(prods):
 <div class="hero-cta"><a class="btn btn-primary" href="#catalog">Browse products &rarr;</a><a class="btn" href="{TG}" target="_blank" rel="noopener noreferrer">Message on Telegram</a></div>
 <div class="perks"><div class="perk">{I_GRID}Curated catalog</div><div class="perk">{I_BOLT}Quick replies</div><div class="perk">{I_SHIELD}Simple ordering</div><div class="perk">{I_CHAT}Telegram support</div></div>
 </div></section>
-<div class="strip" aria-hidden="true"><div class="strip-track">{strip}{strip}</div></div>
+<div class="strip" aria-hidden="true"><div class="strip-track"><div class="strip-set">{strip}</div><div class="strip-set">{strip}</div></div></div>
 <section class="section" id="catalog"><div class="wrap">
 <p class="eyebrow">All products</p><h2>Explore the catalog</h2><p class="lede">Search the collection or filter by price, open any item for details, and add it to your cart.</p>
 <div class="toolbar"><label class="search">{SEARCH}<span class="sr-only">Search products</span><input type="search" placeholder="Search products" data-search autocomplete="off"></label>
@@ -118,7 +134,7 @@ def page(prods):
 </div></div></section>
 <section id="support"><div class="wrap"><div class="cta reveal"><p class="eyebrow">Support</p><h2>Questions? Just ask.</h2><p>Our Telegram channel is the fastest way to reach us for orders and help.</p><a class="btn btn-primary" href="{TG}" target="_blank" rel="noopener noreferrer">Open Telegram &rarr;</a></div></div></section>
 </main>
-<footer class="footer"><div class="wrap"><div><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">&#9671;</span><span class="brand-text"><span class="brand-name">{TITLE}</span><span class="brand-sub">Digital products</span></span></a><p>Browse, add to cart and order through Telegram.</p></div>
+<footer class="footer"><div class="wrap"><div class="foot-about"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">&#9671;</span><span class="brand-text"><span class="brand-name">{TITLE}</span><span class="brand-sub">Digital products</span></span></a><p>Browse, add to cart and order through Telegram.</p></div>
 <div><h4>Store</h4><ul><li><a href="#catalog">Products</a></li><li><a href="#why">How it works</a></li></ul></div>
 <div><h4>Contact</h4><ul><li><a href="{TG}" target="_blank" rel="noopener noreferrer">Telegram</a></li><li><a href="#support">Support</a></li></ul></div>
 <p class="legal">&copy; {TITLE}. All rights reserved.</p></div></footer>
@@ -131,6 +147,10 @@ def main():
     ap.add_argument("--db", default=DEFAULT_DB); ap.add_argument("--no-samples", action="store_true")
     a = ap.parse_args()
     prods = build_products(a.db, not a.no_samples)
+    used = {os.path.basename(i) for p in prods for i in p["images"] if i.startswith("images/")}
+    for f in os.listdir(os.path.join(HERE, "images")) if os.path.isdir(os.path.join(HERE, "images")) else []:
+        if f not in used:
+            os.remove(os.path.join(HERE, "images", f))
     with open(os.path.join(HERE, "products.json"), "w", encoding="utf-8") as f:
         json.dump(prods, f, ensure_ascii=False, indent=2)
     with open(os.path.join(HERE, "index.html"), "w", encoding="utf-8") as f:
