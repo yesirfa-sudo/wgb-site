@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com https://*.github.io; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>wGB◇ Admin</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ============ Sign-in (shown until a token is saved in this browser) ============ -->
+<div id="login" class="login" hidden>
+  <div class="login-card">
+    <p class="eyebrow">wGB◇ admin</p>
+    <h1>Sign in with a GitHub token</h1>
+    <p class="lead">This page edits your storefront's text, colors and layout. It has no password of its own. Instead you give it a small, locked-down GitHub key that can only touch <b>this one repository</b>. You only do this once per device.</p>
+
+    <ol class="steps">
+      <li>Open GitHub's token page (sign in as <b id="ownerName">yesirfa-sudo</b> if asked):<br>
+        <a class="btn btn-primary" id="tokenLink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Create the token on GitHub &rarr;</a>
+        <span class="muted small">Same page as <code>github.com/settings/personal-access-tokens/new</code>. By hand: your profile picture &rarr; <b>Settings</b> &rarr; <b>Developer settings</b> &rarr; <b>Personal access tokens</b> &rarr; <b>Fine-grained tokens</b> &rarr; <b>Generate new token</b>.</span></li>
+      <li><b>Token name:</b> <code>wGB admin</code>. <b>Expiration:</b> pick <b>90 days</b> (shorter is safer; when it expires just make a new one the same way).</li>
+      <li><b>Resource owner:</b> <b data-owner>yesirfa-sudo</b>.</li>
+      <li><b>Repository access:</b> choose <b>Only select repositories</b>, then pick <b data-repo>wgb-site</b> and nothing else.</li>
+      <li><b>Permissions:</b> click <b>Add permissions</b> (or open <b>Repository permissions</b>), find <b>Contents</b> and set it to <b>Read and write</b>. Leave everything else as <i>No access</i>. (GitHub adds read-only "Metadata" by itself. That's fine.)</li>
+      <li>Click <b>Generate token</b>, then <b>copy</b> the token (it starts with <code>github_pat_</code>). GitHub only shows it once.</li>
+      <li>Paste it below and press <b>Connect</b>.</li>
+    </ol>
+
+    <form id="loginForm" autocomplete="off">
+      <label class="field"><span>Paste your token</span>
+        <input id="tokenInput" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_..." required></label>
+      <button class="btn btn-primary" type="submit" id="connectBtn">Connect</button>
+      <p id="loginError" class="error" role="alert" hidden></p>
+    </form>
+
+    <div class="note">
+      <b>Is this safe?</b> The token is saved only in this browser (localStorage), is sent only to <code>api.github.com</code>, and is never written into the website's files. Anyone who opens this page without the token can look at the screen but can't change anything. To lock a device out, press <b>Sign out</b> here, or delete the token any time at <code>github.com/settings/personal-access-tokens</code>. Use the same steps on your phone and your PC (each device needs its own paste).
+    </div>
+  </div>
+</div>
+
+<!-- ============ Editor ============ -->
+<div id="app" hidden>
+  <header class="bar">
+    <div class="bar-left"><span class="mark" aria-hidden="true">&#9671;</span><b>wGB◇</b><span class="muted hide-sm">Admin</span></div>
+    <div class="bar-mid"><span id="statusDot" class="dot"></span><span id="status">Loading...</span></div>
+    <div class="bar-right">
+      <button class="btn btn-ghost" id="revertBtn" type="button" title="Throw away unpublished edits">Revert</button>
+      <button class="btn btn-primary" id="publishBtn" type="button">Publish</button>
+      <button class="btn btn-ghost hide-sm" id="signOutBtn" type="button">Sign out</button>
+    </div>
+  </header>
+  <nav class="viewtabs" aria-label="View">
+    <button type="button" data-view="edit" aria-pressed="true">Edit</button>
+    <button type="button" data-view="preview" aria-pressed="false">Preview</button>
+    <button type="button" id="signOutBtn2">Sign out</button>
+  </nav>
+  <div class="split">
+    <main id="editor" aria-label="Editor"></main>
+    <aside id="preview" aria-label="Live preview">
+      <div class="pv-bar"><span class="muted small">Live preview (not published yet)</span>
+        <span class="pv-toggle"><button type="button" data-dev="desktop" aria-pressed="true">Desktop</button><button type="button" data-dev="phone" aria-pressed="false">Phone</button></span></div>
+      <div class="pv-stage"><iframe id="pvFrame" title="Site preview" src="../index.html?wgb-preview=1"></iframe></div>
+    </aside>
+  </div>
+</div>
+
+<noscript><p style="padding:24px">The admin needs JavaScript.</p></noscript>
+<script src="../assets/render.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

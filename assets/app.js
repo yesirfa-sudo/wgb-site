@@ -1,20 +1,25 @@
 /* wGB◇ storefront: product popup + cart popup (local cart, orders via Telegram) */
 (() => {
-  const shopEl = document.getElementById('wgb-shop');
-  if (!shopEl || shopEl.dataset.modal !== '1') return;
+  const shopEl0 = document.getElementById('wgb-shop');
+  if (!shopEl0 || shopEl0.dataset.modal !== '1') return;
   const root = document.documentElement;
-  const L = (key, fallback) => shopEl.dataset['l' + key] || fallback;
-  const label = {
-    close: L('Close', 'Close'), add: L('Add', 'Add to cart'), viewCart: L('ViewCart', 'View cart'), quantity: L('Quantity', 'Quantity'),
-    totalAmount: L('TotalAmount', 'Total amount'), cartTitle: L('CartTitle', 'Shopping cart'), update: L('Update', 'Update quantity'),
-    save: L('Save', 'Save'), remove: L('Remove', 'Remove'), total: L('Total', 'Total'), cont: L('Continue', 'Continue shopping'),
-    checkout: L('Checkout', 'Go to checkout'), login: L('Login', 'Log in to checkout'), empty: L('Empty', 'Your cart is empty.'),
-    qty: L('Qty', 'Qty'), inStock: L('InStock', 'in stock'), added: L('Added', 'Added to your cart.'),
-    error: L('Error', 'Something went wrong. Please try again.'), working: L('Working', 'Working…')
+  // Labels and the Telegram link are read from the current #wgb-shop element each time, so a re-render (admin preview) takes effect.
+  const shop = () => document.getElementById('wgb-shop') || shopEl0;
+  const L = (key, fallback) => shop().dataset['l' + key] || fallback;
+  const labelDefaults = {
+    close: ['Close', 'Close'], add: ['Add', 'Add to cart'], viewCart: ['ViewCart', 'View cart'], quantity: ['Quantity', 'Quantity'],
+    totalAmount: ['TotalAmount', 'Total amount'], cartTitle: ['CartTitle', 'Shopping cart'], update: ['Update', 'Update quantity'],
+    save: ['Save', 'Save'], remove: ['Remove', 'Remove'], total: ['Total', 'Total'], cont: ['Continue', 'Continue shopping'],
+    checkout: ['Checkout', 'Go to checkout'], login: ['Login', 'Log in to checkout'], empty: ['Empty', 'Your cart is empty.'],
+    qty: ['Qty', 'Qty'], inStock: ['InStock', 'in stock'], added: ['Added', 'Added to your cart.'],
+    error: ['Error', 'Something went wrong. Please try again.'], working: ['Working', 'Working…'],
+    order: ['Order', 'Order via Telegram'],
+    cartNote: ['CartNote', 'Checkout is handled in Telegram. Your cart is copied so you can paste it into the chat.']
   };
+  const label = new Proxy({}, { get: (_, k) => (labelDefaults[k] ? L(labelDefaults[k][0], labelDefaults[k][1]) : undefined) });
 
   // ---- cart state: kept in this browser (localStorage). No checkout backend; orders go through Telegram. ----
-  const TG = shopEl.dataset.telegram || 'https://t.me/AlphaTest3';
+  const tg = () => shop().dataset.telegram || 'https://t.me/AlphaTest3';
   const KEY = 'wgb-cart-v1';
   const money = (n) => '$' + n.toFixed(2);
   const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
@@ -152,7 +157,7 @@
     product.body.appendChild(row);
     const current = () => Math.max(1, Math.min(parseInt(qty.value, 10) || 1, parseInt(qty.max, 10) || 99));
     qty.addEventListener('input', () => { total.textContent = formatMoney(d.priceText, unit * current()); });
-    const order = el('a', { class: 'btn btn-primary', href: TG, target: '_blank', rel: 'noopener noreferrer', text: 'Order via Telegram' });
+    const order = el('a', { class: 'btn btn-primary', href: tg(), target: '_blank', rel: 'noopener noreferrer', text: label.order });
     const add = el('button', { type: 'button', class: 'btn btn-outline', text: label.add });
     const view = el('button', { type: 'button', class: 'btn btn-outline', text: label.viewCart });
     product.foot.textContent = '';
@@ -169,8 +174,8 @@
 
   // ---- cart popup ----
   const cartModal = makeModal('wgb-modal--cart');
-  cartModal.title.textContent = label.cartTitle;
   const renderCart = () => {
+    cartModal.title.textContent = label.cartTitle;
     cartModal.body.textContent = '';
     cartModal.foot.textContent = '';
     cartModal.status.textContent = '';
@@ -207,9 +212,9 @@
     cartModal.body.appendChild(el('hr', { class: 'wgb-cart__rule' }));
     cartModal.body.appendChild(el('p', { class: 'wgb-cart__total' }, [el('span', { text: label.total }), el('strong', { text: cart.total + ' ' + cart.currency })]));
     cartModal.foot.appendChild(contBtn());
-    const checkout = el('a', { class: 'btn btn-primary', href: TG, target: '_blank', rel: 'noopener noreferrer', text: 'Order via Telegram' });
+    const checkout = el('a', { class: 'btn btn-primary', href: tg(), target: '_blank', rel: 'noopener noreferrer', text: label.order });
     checkout.addEventListener('click', () => { try { navigator.clipboard && navigator.clipboard.writeText(orderText()); } catch (e) { /* optional */ } });
-    cartModal.body.appendChild(el('p', { class: 'wgb-cart__note muted', text: 'Checkout is handled in Telegram. Your cart is copied so you can paste it into the chat.' }));
+    cartModal.body.appendChild(el('p', { class: 'wgb-cart__note muted', text: label.cartNote }));
     cartModal.foot.appendChild(checkout);
   };
   const contBtn = () => {
@@ -239,27 +244,38 @@
 })();
 
 /* page behaviour: menu, search + price filters, reveal-on-scroll */
-(() => {
+let pageDocBound = false;
+window.WGBPage = { init() {
   const menu = document.querySelector('[data-menu]');
   const btn = document.querySelector('[data-menu-toggle]');
   if (menu && btn) {
     const set = (o) => { menu.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o)); };
     btn.addEventListener('click', () => set(!menu.classList.contains('open')));
     menu.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu.classList.contains('open')) { set(false); btn.focus(); } });
-    document.addEventListener('click', (e) => { if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) set(false); });
+    if (!pageDocBound) {
+      document.addEventListener('keydown', (e) => { const m = document.querySelector('[data-menu]'); const b = document.querySelector('[data-menu-toggle]'); if (m && e.key === 'Escape' && m.classList.contains('open')) { m.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); b.focus(); } });
+      document.addEventListener('click', (e) => { const m = document.querySelector('[data-menu]'); const b = document.querySelector('[data-menu-toggle]'); if (m && b && m.classList.contains('open') && !m.contains(e.target) && !b.contains(e.target)) { m.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); } });
+    }
   }
+  pageDocBound = true;
+  // cart badge (the cart itself lives in localStorage)
+  try { const n = (JSON.parse(localStorage.getItem('wgb-cart-v1') || '[]') || []).reduce((t, i) => t + (i.qty || 0), 0); document.querySelectorAll('.count').forEach((c) => { c.textContent = String(n); c.dataset.zero = n ? '0' : '1'; }); } catch (e) { /* ignore */ }
   const cards = Array.from(document.querySelectorAll('.store-product'));
   const input = document.querySelector('[data-search]');
   const out = document.querySelector('[data-results]');
   const empty = document.querySelector('[data-empty]');
-  let range = 'all';
-  const ranges = { all: () => true, low: (p) => p < 10, mid: (p) => p >= 10 && p < 30, high: (p) => p >= 30 };
+  const rangeFn = (b) => {
+    if (b.dataset.range === 'all') return () => true;
+    const lo = b.dataset.min !== undefined ? parseFloat(b.dataset.min) : -Infinity;
+    const hi = b.dataset.max !== undefined ? parseFloat(b.dataset.max) : Infinity;
+    return (p) => p >= lo && p < hi;
+  };
+  let inRange = () => true;
   const apply = () => {
     const q = input ? input.value.trim().toLowerCase() : '';
     let n = 0;
     cards.forEach((c) => {
-      const ok = ranges[range](parseFloat(c.dataset.price) || 0) && (!q || c.dataset.name.toLowerCase().includes(q));
+      const ok = inRange(parseFloat(c.dataset.price) || 0) && (!q || c.dataset.name.toLowerCase().includes(q));
       c.hidden = !ok; if (ok) n++;
     });
     if (out) out.innerHTML = '<b>' + n + '</b> result' + (n === 1 ? '' : 's');
@@ -267,7 +283,7 @@
   };
   if (input) input.addEventListener('input', apply);
   document.querySelectorAll('[data-range]').forEach((b) => b.addEventListener('click', () => {
-    range = b.dataset.range;
+    inRange = rangeFn(b);
     document.querySelectorAll('[data-range]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     apply();
   }));
@@ -277,4 +293,5 @@
     const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.08 });
     items.forEach((i) => io.observe(i));
   } else items.forEach((i) => i.classList.add('in'));
-})();
+} };
+window.WGBPage.init();

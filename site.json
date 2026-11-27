@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "updated": "",
+  "brand": { "name": "wGB◇", "mark": "◇", "sub": "Digital products" },
+  "seo": {
+    "title": "wGB◇ | Digital products",
+    "description": "Browse the wGB◇ catalog and order through Telegram."
+  },
+  "telegram": "https://t.me/AlphaTest3",
+  "colors": {
+    "bg": "#060709",
+    "bg2": "#0b0d11",
+    "panel": "#0f1217",
+    "panel2": "#151921",
+    "text": "#f4f5f7",
+    "muted": "#8c93a1",
+    "soft": "#b7bcc8",
+    "silverTop": "#ffffff",
+    "silverMid": "#e9ecf2",
+    "silverBottom": "#8d95a6",
+    "btnTop": "#6b7280",
+    "btnBottom": "#3b4049"
+  },
+  "sections": {
+    "strip": true,
+    "perks": true,
+    "why": true,
+    "support": true,
+    "faq": false,
+    "telegramFloat": true
+  },
+  "nav": { "products": "Products", "why": "How it works", "support": "Support", "faq": "FAQ" },
+  "labels": {
+    "order": "Order via Telegram",
+    "purchase": "Purchase",
+    "addToCart": "Add to cart",
+    "viewCart": "View cart",
+    "continueShopping": "Continue shopping",
+    "cartTitle": "Shopping cart",
+    "cartNote": "Checkout is handled in Telegram. Your cart is copied so you can paste it into the chat.",
+    "emptyCart": "Your cart is empty.",
+    "noResults": "Nothing matches your search.",
+    "searchPlaceholder": "Search products"
+  },
+  "hero": {
+    "line1": "Level up",
+    "line2": "your loadout",
+    "text": "Browse the wGB◇ catalog, pick what you need, and finish your order with us in Telegram.",
+    "primaryButton": "Browse products →",
+    "secondaryButton": "Message on Telegram"
+  },
+  "perks": [
+    { "icon": "grid", "text": "Curated catalog" },
+    { "icon": "bolt", "text": "Quick replies" },
+    { "icon": "shield", "text": "Simple ordering" },
+    { "icon": "chat", "text": "Telegram support" }
+  ],
+  "catalog": {
+    "eyebrow": "All products",
+    "heading": "Explore the catalog",
+    "text": "Search the collection or filter by price, open any item for details, and add it to your cart.",
+    "filters": {
+      "enabled": true,
+      "allLabel": "All",
+      "items": [
+        { "label": "Under $10", "min": null, "max": 10 },
+        { "label": "$10 - $30", "min": 10, "max": 30 },
+        { "label": "$30+", "min": 30, "max": null }
+      ]
+    }
+  },
+  "why": {
+    "eyebrow": "How it works",
+    "heading": "Ordering made simple",
+    "text": "Four quick steps from browsing to delivery.",
+    "steps": [
+      { "icon": "grid", "title": "1. Browse", "text": "Look through the catalog and open any product to see what is included." },
+      { "icon": "cart", "title": "2. Add to cart", "text": "Pick quantities and review your total before you commit to anything." },
+      { "icon": "chat", "title": "3. Message us", "text": "Tap Order via Telegram and paste your cart into the chat." },
+      { "icon": "pen", "title": "4. Confirm", "text": "We confirm the details with you directly and take it from there." }
+    ]
+  },
+  "support": {
+    "eyebrow": "Support",
+    "heading": "Questions? Just ask.",
+    "text": "Our Telegram channel is the fastest way to reach us for orders and help.",
+    "button": "Open Telegram →"
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "heading": "Frequently asked questions",
+    "items": [
+      { "q": "How do I order?", "a": "Add what you want to your cart, tap Order via Telegram and paste your cart into the chat. We confirm the details with you directly." }
+    ]
+  },
+  "footer": {
+    "about": "Browse, add to cart and order through Telegram.",
+    "columns": [
+      { "title": "Store", "links": [ { "label": "Products", "href": "#catalog" }, { "label": "How it works", "href": "#why" } ] },
+      { "title": "Contact", "links": [ { "label": "Telegram", "href": "{telegram}" }, { "label": "Support", "href": "#support" } ] }
+    ],
+    "legal": "© wGB◇. All rights reserved."
+  },
+  "products": {
+    "order": [],
+    "overrides": {}
+  }
+}
