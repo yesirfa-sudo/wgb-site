@@ -1,0 +1,104 @@
+[
+  {
+    "id": "p1",
+    "name": "Test",
+    "price": 10.0,
+    "description": "Test",
+    "category": "Test",
+    "images": [
+      "images/3201ea3add3d416891594a5e85549696.jpg",
+      "images/008519b8856a468486b896039dbb291f.jpg",
+      "images/8e0ca517aa074d64b31c7b86aca6b684.jpg",
+      "images/eb9a6fc2983c44c2b355058f53262ac5.jpg"
+    ],
+    "sample": false
+  },
+  {
+    "id": "s1",
+    "name": "Sample product 1",
+    "price": 4.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-2.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s2",
+    "name": "Sample product 2",
+    "price": 9.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-3.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s3",
+    "name": "Sample product 3",
+    "price": 14.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-4.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s4",
+    "name": "Sample product 4",
+    "price": 19.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-5.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s5",
+    "name": "Sample product 5",
+    "price": 24.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-6.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s6",
+    "name": "Sample product 6",
+    "price": 29.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-7.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s7",
+    "name": "Sample product 7",
+    "price": 39.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-1.jpg"
+    ],
+    "sample": true
+  },
+  {
+    "id": "s8",
+    "name": "Sample product 8",
+    "price": 49.99,
+    "description": "Placeholder product. Message us on Telegram to order.",
+    "category": "",
+    "images": [
+      "placeholders/placeholder-2.jpg"
+    ],
+    "sample": true
+  }
+]
