@@ -1,234 +1,4 @@
-/* wGB◇ store theme */
-(() => {
-  'use strict';
-  const root = document.documentElement;
-  // Short messages stay centered; overflowing text loops as a news ticker.
-  const announcement = document.querySelector('[data-announcement]');
-  if (announcement) {
-    const viewport = announcement.querySelector('[data-announcement-viewport]');
-    const track = announcement.querySelector('[data-announcement-track]');
-    const message = announcement.querySelector('[data-announcement-text]');
-    const pause = announcement.querySelector('[data-announcement-toggle]');
-    if (viewport && track && message && pause) {
-      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-      const duplicate = message.cloneNode(true);
-      duplicate.removeAttribute('data-announcement-text');
-      duplicate.setAttribute('aria-hidden', 'true');
-      duplicate.classList.add('announcement-duplicate');
-      duplicate.hidden = true;
-      track.appendChild(duplicate);
-      let paused = false;
-      const refresh = () => {
-        announcement.classList.add('ticker-ready');
-        const textWidth = message.scrollWidth;
-        const scrolling = !motion.matches && announcement.clientWidth > 0 && textWidth > announcement.clientWidth + 1;
-        announcement.classList.toggle('is-scrolling', scrolling);
-        duplicate.hidden = !scrolling;
-        pause.hidden = !scrolling;
-        if (scrolling) {
-          const distance = textWidth + 48;
-          track.style.setProperty('--ticker-distance', '-' + distance + 'px');
-          track.style.setProperty('--ticker-duration', Math.max(12, distance / 40) + 's');
-        }
-      };
-      pause.addEventListener('click', () => {
-        paused = !paused;
-        announcement.classList.toggle('ticker-paused', paused);
-        pause.setAttribute('aria-pressed', String(paused));
-        pause.setAttribute('aria-label', paused ? 'Resume announcement' : 'Pause announcement');
-        pause.textContent = paused ? 'Play' : 'Pause';
-      });
-      if (typeof window.ResizeObserver === 'function') {
-        const observer = new window.ResizeObserver(refresh);
-        observer.observe(announcement);
-        observer.observe(message);
-      } else {
-        window.addEventListener('resize', refresh);
-      }
-      if (typeof motion.addEventListener === 'function') motion.addEventListener('change', refresh);
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
-      refresh();
-    }
-  }
-
-  const toggles = Array.from(document.querySelectorAll('[data-nav-toggle]'));
-  if (toggles.length) {
-    const drawer = document.getElementById('store-navigation');
-    const phone = window.matchMedia ? window.matchMedia('(max-width: 760px)') : { matches: false };
-    let lastToggle = toggles[0];
-    const setOpen = (open, returnFocus) => {
-      root.classList.toggle('nav-open', open);
-      toggles.forEach((t) => t.setAttribute('aria-expanded', String(open)));
-      if (drawer && phone.matches) {
-        if (open) {
-          const first = drawer.querySelector('a, summary, button');
-          if (first) first.focus({ preventScroll: true });
-        } else if (returnFocus) {
-          lastToggle.focus({ preventScroll: true });
-        }
-      }
-    };
-    toggles.forEach((t) => t.addEventListener('click', () => {
-      lastToggle = t;
-      setOpen(!root.classList.contains('nav-open'));
-    }));
-    document.querySelectorAll('[data-nav-close]').forEach((el) => el.addEventListener('click', () => setOpen(false, true)));
-    if (drawer) drawer.addEventListener('click', (event) => {
-      if (event.target.closest && event.target.closest('a')) setOpen(false);
-    });
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && root.classList.contains('nav-open')) setOpen(false, true);
-    });
-    const leavePhone = () => { if (!phone.matches && root.classList.contains('nav-open')) setOpen(false); };
-    if (phone.addEventListener) phone.addEventListener('change', leavePhone);
-    else if (phone.addListener) phone.addListener(leavePhone);
-    root.classList.add('js');
-  }
-
-  const featured = document.querySelector('[data-home-featured]');
-  const grid = document.querySelector('[data-featured-grid]');
-  if (featured && grid) {
-    document.querySelectorAll('[data-module-source] [data-featured-module]').forEach((module) => grid.appendChild(module));
-    featured.hidden = grid.children.length === 0;
-  }
-
-  // Use Tebex's actual configured modules; never fabricate customer activity.
-  const customerLayout = document.querySelector('[data-customer-layout]');
-  const leftCustomers = document.querySelector('[data-customer-left]');
-  const rightCustomers = document.querySelector('[data-customer-right]');
-  if (customerLayout && leftCustomers && rightCustomers) {
-    const placeModules = (kind, target, className) => {
-      document.querySelectorAll('[data-module-source] [data-customer-module="' + kind + '"]').forEach((module) => target.appendChild(module));
-      const populated = target.children.length > 0;
-      target.hidden = !populated;
-      customerLayout.classList.toggle(className, populated);
-    };
-    placeModules('top-customer', leftCustomers, 'has-left-customers');
-    placeModules('recent-customers', rightCustomers, 'has-right-customers');
-    const moduleSource = document.querySelector('[data-module-source]');
-    if (moduleSource && !moduleSource.querySelector('.widget, .store-product')) {
-      const remainder = moduleSource.closest('.store-sidebar');
-      if (remainder) remainder.hidden = true;
-    }
-  }
-
-  // The grid is populated before search binds, including homepage featured modules.
-  const search = document.querySelector('[data-package-search]');
-  const cards = Array.from(document.querySelectorAll('.store-main .store-products .store-product'));
-  if (search && cards.length) {
-    const input = search.querySelector('[data-search-input]');
-    const clear = search.querySelector('[data-search-clear]');
-    const message = search.querySelector('[data-search-status]');
-    const empty = search.querySelector('[data-search-empty]');
-    const normalize = (text) => text.normalize('NFKC').toLocaleLowerCase().trim().replace(/\s+/g, ' ');
-    const entries = cards.map((card) => ({
-      title: normalize(card.querySelector('.product-title').textContent),
-      element: card.closest('[data-featured-module]') || card
-    }));
-    const filter = () => {
-      const query = normalize(input.value);
-      const words = query.split(' ').filter(Boolean);
-      let visible = 0;
-      entries.forEach((entry) => {
-        const matches = words.every((word) => entry.title.includes(word));
-        entry.element.hidden = !matches;
-        if (matches) visible++;
-      });
-      clear.hidden = !input.value;
-      empty.hidden = visible !== 0;
-      message.textContent = query ? visible + ' / ' + entries.length : '';
-    };
-    input.addEventListener('input', filter);
-    clear.addEventListener('click', () => { input.value = ''; filter(); input.focus(); });
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') { input.value = ''; filter(); }
-    });
-    search.hidden = false;
-    filter();
-  }
-
-  document.querySelectorAll('[data-copy-ip]').forEach((button) => {
-    const label = button.querySelector('[data-copy-label]');
-    const status = button.parentElement.querySelector('[data-copy-status]');
-    const manual = button.parentElement.querySelector('[data-copy-manual]');
-    let copying = false;
-    button.addEventListener('click', async () => {
-      if (copying) return;
-      copying = true;
-      const address = button.dataset.copyIp.trim();
-      let copied = false;
-      try {
-        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-          await navigator.clipboard.writeText(address);
-          copied = true;
-        }
-      } catch (_) { /* Try the selection fallback when clipboard permission is denied. */ }
-      if (!copied && manual) {
-        manual.hidden = false;
-        manual.value = address;
-        manual.focus();
-        manual.select();
-        manual.setSelectionRange(0, address.length);
-        try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
-      }
-      if (copied) {
-        if (manual) manual.hidden = true;
-        button.focus();
-        if (label) label.textContent = 'Copied!';
-        if (status) status.textContent = 'Server address copied.';
-      } else {
-        if (label) label.textContent = 'Copy address';
-        if (status) status.textContent = 'Select the address below and copy it manually.';
-      }
-      copying = false;
-    });
-  });
-
-  document.querySelectorAll('[data-currency]').forEach((select) => {
-    select.addEventListener('change', () => {
-      if (select.form && typeof select.form.requestSubmit === 'function') select.form.requestSubmit();
-    });
-    const submit = select.form && select.form.querySelector('.currency-submit');
-    if (submit && typeof select.form.requestSubmit === 'function') submit.hidden = true;
-  });
-
-  document.querySelectorAll('[data-gallery]').forEach((gallery) => {
-    const track = gallery.querySelector('[data-media-track]');
-    const previous = gallery.querySelector('[data-gallery-prev]');
-    const next = gallery.querySelector('[data-gallery-next]');
-    if (!track || !previous || !next) return;
-    const update = () => {
-      previous.disabled = track.scrollLeft <= 2;
-      next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
-    };
-    const advance = (direction) => track.scrollBy({left: direction * track.clientWidth, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
-    previous.addEventListener('click', () => advance(-1));
-    next.addEventListener('click', () => advance(1));
-    track.addEventListener('scroll', update, {passive:true});
-    window.addEventListener('resize', update);
-    update();
-  });
-
-  document.querySelectorAll('[data-countdown]').forEach((element) => {
-    const seconds = Number(element.dataset.countdown);
-    if (!Number.isFinite(seconds) || seconds <= 0) return;
-    const end = Date.now() + seconds * 1000;
-    let timer;
-    const update = () => {
-      const remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
-      const days = Math.floor(remaining / 86400);
-      const hours = Math.floor(remaining % 86400 / 3600);
-      const minutes = Math.floor(remaining % 3600 / 60);
-      element.textContent = (days ? days + 'd ' : '') + hours + 'h ' + minutes + 'm ' + remaining % 60 + 's';
-      if (!remaining && timer) clearInterval(timer);
-    };
-    update();
-    timer = setInterval(update, 1000);
-  });
-
-})();
-
-/* Product popup + cart popup. Original code; talks to the same Tebex basket URLs the theme already uses. */
+/* wGB◇ storefront: product popup + cart popup (local cart, orders via Telegram) */
 (() => {
   const shopEl = document.getElementById('wgb-shop');
   if (!shopEl || shopEl.dataset.modal !== '1') return;
@@ -257,7 +27,7 @@
   let cart = view_();
   const applyCart = () => {
     cart = view_();
-    document.querySelectorAll('.basket-link .count, .mobile-dock .count').forEach((c) => { c.textContent = String(stored.reduce((t, i) => t + i.qty, 0)); });
+    const n = stored.reduce((t, i) => t + i.qty, 0); document.querySelectorAll('.count').forEach((c) => { c.textContent = String(n); c.dataset.zero = n ? '0' : '1'; });
   };
   const addItem = (d, img, qty) => {
     const found = stored.find((i) => i.id === d.id);
@@ -451,4 +221,43 @@
     const basket = e.target.closest && e.target.closest('[data-open-cart]');
     if (basket && plain(e) && !basket.closest('.wgb-modal')) { e.preventDefault(); openCart(basket); }
   });
+})();
+
+/* page behaviour: menu, search + price filters, reveal-on-scroll */
+(() => {
+  const menu = document.querySelector('[data-menu]');
+  const btn = document.querySelector('[data-menu-toggle]');
+  if (menu && btn) {
+    const set = (o) => { menu.classList.toggle('open', o); btn.setAttribute('aria-expanded', String(o)); };
+    btn.addEventListener('click', () => set(!menu.classList.contains('open')));
+    menu.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+  }
+  const cards = Array.from(document.querySelectorAll('.store-product'));
+  const input = document.querySelector('[data-search]');
+  const out = document.querySelector('[data-results]');
+  const empty = document.querySelector('[data-empty]');
+  let range = 'all';
+  const ranges = { all: () => true, low: (p) => p < 10, mid: (p) => p >= 10 && p < 30, high: (p) => p >= 30 };
+  const apply = () => {
+    const q = input ? input.value.trim().toLowerCase() : '';
+    let n = 0;
+    cards.forEach((c) => {
+      const ok = ranges[range](parseFloat(c.dataset.price) || 0) && (!q || c.dataset.name.toLowerCase().includes(q));
+      c.hidden = !ok; if (ok) n++;
+    });
+    if (out) out.innerHTML = '<b>' + n + '</b> result' + (n === 1 ? '' : 's');
+    if (empty) empty.hidden = n > 0;
+  };
+  if (input) input.addEventListener('input', apply);
+  document.querySelectorAll('[data-range]').forEach((b) => b.addEventListener('click', () => {
+    range = b.dataset.range;
+    document.querySelectorAll('[data-range]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    apply();
+  }));
+  apply();
+  const items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.08 });
+    items.forEach((i) => io.observe(i));
+  } else items.forEach((i) => i.classList.add('in'));
 })();

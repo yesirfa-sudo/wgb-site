@@ -52,36 +52,79 @@ def build_products(db, use_samples):
             p["images"] = [placeholder(n + 1)]
     return prods
 
-BASKET = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 8 4-5 4 5M3 8h18l-2 12H5L3 8Zm6 4v4m6-4v4"/></svg>'
+def ico(path):
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%s</svg>' % path
+BAG = ico('<path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/>')
+MENU = ico('<path d="M4 7h16M4 12h16M4 17h16"/>')
+SEARCH = ico('<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/>')
+I_GRID = ico('<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>')
+I_BOLT = ico('<path d="M13 3 5 13h6l-1 8 8-10h-6l1-8Z"/>')
+I_CHAT = ico('<path d="M5 5h14v10H10l-5 4V5Z"/>')
+I_SHIELD = ico('<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>')
+I_CART = ico('<path d="M3 4h2l2 11h11l2-8H7"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/>')
+I_PEN = ico('<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>')
 TGSVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.4 3.6 2.8 10.8c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.5c.2.6.4.8.8.8s.6-.2.9-.5l2.2-2.1 4.5 3.4c.8.5 1.4.2 1.6-.8l3.1-14.5c.3-1.2-.4-1.8-1.5-1.4ZM9.2 14.1l9.5-6c.4-.3.8-.1.5.2l-7.9 7-.3 3.2-1.8-4.4Z"/></svg>'
 
 def card(p):
     desc = "".join("<p>%s</p>" % e(x) for x in p["description"].split("\n") if x.strip()) or "<p>Message us on Telegram to order.</p>"
-    return f'''<article class="store-product" data-product data-simple="1" data-id="{e(p['id'])}" data-identifier="{e(p['id'])}" data-name="{e(p['name'])}" data-price="{p['price']}" data-price-text="{money(p['price'])}" data-fixed-qty="0">
-<a class="product-image-link" href="#" aria-label="{e(p['name'])}" data-product-open><div class="product-image"><img src="{e(p['images'][0])}" alt="{e(p['name'])}" loading="lazy" width="1600" height="900"></div></a>
-<div class="product-body"><h2 class="product-title"><a href="#" data-product-open>{e(p['name'])}</a></h2>
-<a class="btn btn-outline product-buy" href="#" data-product-open>Purchase<span class="buy-sep" aria-hidden="true">|</span><span class="buy-price">{money(p['price'])}</span></a>
-<template data-product-desc>{desc}</template></div></article>'''
+    return f"""<article class="store-product reveal" data-product data-simple="1" data-id="{e(p['id'])}" data-identifier="{e(p['id'])}" data-name="{e(p['name'])}" data-price="{p['price']}" data-price-text="{money(p['price'])}" data-fixed-qty="0">
+<a class="card-link" href="#" aria-label="{e(p['name'])}, {money(p['price'])}" data-product-open>
+<div class="product-image"><img src="{e(p['images'][0])}" alt="" loading="lazy" width="640" height="360"></div>
+<div class="product-body"><h3 class="product-title">{e(p['name'])}</h3>
+<div class="product-meta"><span class="product-buy">Purchase</span><span class="price-pill">{money(p['price'])} <span class="arrow" aria-hidden="true">&#8599;</span></span></div></div></a>
+<template data-product-desc>{desc}</template></article>"""
+
+def chip(p):
+    return f'<div class="chip"><img src="{e(p["images"][0])}" alt="" loading="lazy"><b>{e(p["name"])}</b></div>'
 
 def page(prods):
     cards = "".join(card(p) for p in prods)
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{TITLE}</title><meta name="description" content="{TITLE} storefront. Order via Telegram."><meta name="theme-color" content="#0d0b0e">
-<link rel="stylesheet" href="assets/generic.css"><link rel="stylesheet" href="assets/shared.css">
-<style>:root{{--background:#0d0b0e;--surface:#191316;--surface-raised:#261a20;--accent:#ff4059;--text:#fff5f6;--muted:#c2aeb4;--border:#48212b;--columns:4;--columns-tablet:4;--columns-compact:3;--image-fit:cover;--logo-width:220px}}
-.login-button{{display:none}}</style>
-<script defer src="assets/main.js"></script></head>
-<body class="wgb-theme"><a class="skip-link" href="#main-content">Skip to content</a>
-<div class="announcement-bar"><div class="announcement-inner"><div class="announcement-social-left"></div>
-<div class="store-toolbar topbar-controls"><div><a class="btn btn-primary" href="{TG}" target="_blank" rel="noopener noreferrer">Order via Telegram</a></div><div class="toolbar-actions"><span class="muted">USD</span><a href="#" data-open-cart class="basket-link">{BASKET} Cart <span class="count">0</span></a></div></div></div></div>
-<header class="site-header compact-header"><a href="./" class="store-brand"><span class="store-wordmark">{TITLE}</span></a></header>
-<nav class="mobile-dock" aria-label="Quick actions"><a class="dock-item" href="./"><span>Home</span></a>
-<a class="dock-item" href="#" data-open-cart>{BASKET}<span>Cart <b class="count">0</b></span></a><a class="dock-item" href="{TG}" target="_blank" rel="noopener noreferrer"><span>Order</span></a></nav>
-<div class="site-content customer-layout"><main id="main-content" class="store-main"><section class="home-featured"><h2 class="section-title">Hot products</h2><div class="store-products">{cards}</div></section></main></div>
-<footer class="site-footer"><div><a class="footer-brand" href="./">{TITLE}</a></div><div class="footer-links"><a href="{TG}" target="_blank" rel="noopener noreferrer">Telegram</a></div></footer>
+    strip = "".join(chip(p) for p in prods)
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{TITLE} | Digital products</title><meta name="description" content="Browse the {TITLE} catalog and order through Telegram."><meta name="theme-color" content="#060709">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="assets/style.css"><script defer src="assets/app.js"></script></head>
+<body>
+<header class="topbar"><div class="wrap">
+<a class="brand" href="./" aria-label="{TITLE} home"><span class="brand-mark" aria-hidden="true">&#9671;</span><span class="brand-text"><span class="brand-name">{TITLE}</span><span class="brand-sub">Digital products</span></span></a>
+<nav class="nav" aria-label="Main"><a href="#catalog">Products</a><a href="#why">How it works</a><a href="#support">Support</a></nav>
+<div class="actions"><a class="btn btn-primary btn-small" href="{TG}" target="_blank" rel="noopener noreferrer">Order via Telegram</a>
+<button type="button" class="icon-btn" data-open-cart aria-label="Open cart">{BAG}<span class="count" data-zero="1">0</span></button>
+<button type="button" class="icon-btn menu-btn" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">{MENU}</button></div></div></header>
+<div class="mobile-menu" id="mobile-menu" data-menu><a href="#catalog">Products</a><a href="#why">How it works</a><a href="#support">Support</a><a href="{TG}" target="_blank" rel="noopener noreferrer">Order via Telegram</a></div>
+<main>
+<section class="hero"><div class="wrap">
+<h1>Level up<span>your loadout</span></h1>
+<p>Browse the {TITLE} catalog, pick what you need, and finish your order with us in Telegram.</p>
+<div class="hero-cta"><a class="btn btn-primary" href="#catalog">Browse products &rarr;</a><a class="btn" href="{TG}" target="_blank" rel="noopener noreferrer">Message on Telegram</a></div>
+<div class="perks"><div class="perk">{I_GRID}Curated catalog</div><div class="perk">{I_BOLT}Quick replies</div><div class="perk">{I_SHIELD}Simple ordering</div><div class="perk">{I_CHAT}Telegram support</div></div>
+</div></section>
+<div class="strip" aria-hidden="true"><div class="strip-track">{strip}{strip}</div></div>
+<section class="section" id="catalog"><div class="wrap">
+<p class="eyebrow">All products</p><h2>Explore the catalog</h2><p class="lede">Search the collection or filter by price, open any item for details, and add it to your cart.</p>
+<div class="toolbar"><label class="search">{SEARCH}<span class="sr-only">Search products</span><input type="search" placeholder="Search products" data-search autocomplete="off"></label>
+<div class="filters" role="group" aria-label="Filter by price"><button class="filter" type="button" data-range="all" aria-pressed="true">All</button><button class="filter" type="button" data-range="low" aria-pressed="false">Under $10</button><button class="filter" type="button" data-range="mid" aria-pressed="false">$10 - $30</button><button class="filter" type="button" data-range="high" aria-pressed="false">$30+</button></div>
+<p class="results" data-results aria-live="polite"></p></div>
+<div class="grid">{cards}<p class="empty-note" data-empty hidden>Nothing matches your search.</p></div>
+</div></section>
+<section class="section" id="why"><div class="wrap center">
+<p class="eyebrow">How it works</p><h2>Ordering made simple</h2><p class="lede">Four quick steps from browsing to delivery.</p>
+<div class="features">
+<div class="feature reveal"><div class="ico">{I_GRID}</div><h3>1. Browse</h3><p>Look through the catalog and open any product to see what is included.</p></div>
+<div class="feature reveal"><div class="ico">{I_CART}</div><h3>2. Add to cart</h3><p>Pick quantities and review your total before you commit to anything.</p></div>
+<div class="feature reveal"><div class="ico">{I_CHAT}</div><h3>3. Message us</h3><p>Tap Order via Telegram and paste your cart into the chat.</p></div>
+<div class="feature reveal"><div class="ico">{I_PEN}</div><h3>4. Confirm</h3><p>We confirm the details with you directly and take it from there.</p></div>
+</div></div></section>
+<section id="support"><div class="wrap"><div class="cta reveal"><p class="eyebrow">Support</p><h2>Questions? Just ask.</h2><p>Our Telegram channel is the fastest way to reach us for orders and help.</p><a class="btn btn-primary" href="{TG}" target="_blank" rel="noopener noreferrer">Open Telegram &rarr;</a></div></div></section>
+</main>
+<footer class="footer"><div class="wrap"><div><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">&#9671;</span><span class="brand-text"><span class="brand-name">{TITLE}</span><span class="brand-sub">Digital products</span></span></a><p>Browse, add to cart and order through Telegram.</p></div>
+<div><h4>Store</h4><ul><li><a href="#catalog">Products</a></li><li><a href="#why">How it works</a></li></ul></div>
+<div><h4>Contact</h4><ul><li><a href="{TG}" target="_blank" rel="noopener noreferrer">Telegram</a></li><li><a href="#support">Support</a></li></ul></div>
+<p class="legal">&copy; {TITLE}. All rights reserved.</p></div></footer>
 <div id="wgb-shop" hidden data-modal="1" data-currency="USD" data-telegram="{TG}"></div>
 <a class="tg-float" href="{TG}" target="_blank" rel="noopener noreferrer" aria-label="Order via Telegram" title="Order via Telegram">{TGSVG}</a>
-</body></html>'''
+</body></html>"""
 
 def main():
     ap = argparse.ArgumentParser()

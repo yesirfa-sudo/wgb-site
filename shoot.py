@@ -8,8 +8,11 @@ with sync_playwright() as p:
         errs=[]; pg.on("pageerror",lambda e:errs.append(str(e))); pg.on("console",lambda m:m.type=="error" and errs.append(m.text))
         pg.goto(U,wait_until="networkidle"); pg.wait_for_timeout(500)
         pg.screenshot(path=f"{out}/{tag}-{name}.png")
+        pg.evaluate("document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in'))"); pg.wait_for_timeout(700)
+        pg.screenshot(path=f"{out}/{tag}-{name}-full.png",full_page=True)
+        print(name,"hscroll:",pg.evaluate("document.documentElement.scrollWidth>innerWidth"))
         if name!="tablet":
-            pg.click(".store-product:nth-child(2) .product-buy"); pg.wait_for_timeout(300)
+            pg.click(".store-product:nth-child(2) .card-link"); pg.wait_for_timeout(300)
             pg.screenshot(path=f"{out}/{tag}-{name}-product.png")
             btns=pg.locator(".wgb-modal--product .wgb-modal__foot button"); btns.nth(0).click(); pg.wait_for_timeout(200)
             btns.nth(1).click(); pg.wait_for_timeout(300)
