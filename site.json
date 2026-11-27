@@ -1,7 +1,9 @@
 {
-  "version": 1,
-  "updated": "",
-  "brand": { "name": "wGB◇", "mark": "◇", "sub": "Digital products" },
+  "brand": {
+    "name": "wGB◇",
+    "mark": "◇",
+    "sub": "Digital products"
+  },
   "seo": {
     "title": "wGB◇ | Digital products",
     "description": "Browse the wGB◇ catalog and order through Telegram."
@@ -29,7 +31,12 @@
     "faq": false,
     "telegramFloat": true
   },
-  "nav": { "products": "Products", "why": "How it works", "support": "Support", "faq": "FAQ" },
+  "nav": {
+    "products": "Products",
+    "why": "How it works",
+    "support": "Support",
+    "faq": "FAQ"
+  },
   "labels": {
     "order": "Order via Telegram",
     "purchase": "Purchase",
@@ -50,10 +57,22 @@
     "secondaryButton": "Message on Telegram"
   },
   "perks": [
-    { "icon": "grid", "text": "Curated catalog" },
-    { "icon": "bolt", "text": "Quick replies" },
-    { "icon": "shield", "text": "Simple ordering" },
-    { "icon": "chat", "text": "Telegram support" }
+    {
+      "icon": "grid",
+      "text": "Curated catalog"
+    },
+    {
+      "icon": "bolt",
+      "text": "Quick replies"
+    },
+    {
+      "icon": "shield",
+      "text": "Simple ordering"
+    },
+    {
+      "icon": "chat",
+      "text": "Telegram support"
+    }
   ],
   "catalog": {
     "eyebrow": "All products",
@@ -63,9 +82,21 @@
       "enabled": true,
       "allLabel": "All",
       "items": [
-        { "label": "Under $10", "min": null, "max": 10 },
-        { "label": "$10 - $30", "min": 10, "max": 30 },
-        { "label": "$30+", "min": 30, "max": null }
+        {
+          "label": "Under $10",
+          "min": null,
+          "max": 10
+        },
+        {
+          "label": "$10 - $30",
+          "min": 10,
+          "max": 30
+        },
+        {
+          "label": "$30+",
+          "min": 30,
+          "max": null
+        }
       ]
     }
   },
@@ -74,10 +105,26 @@
     "heading": "Ordering made simple",
     "text": "Four quick steps from browsing to delivery.",
     "steps": [
-      { "icon": "grid", "title": "1. Browse", "text": "Look through the catalog and open any product to see what is included." },
-      { "icon": "cart", "title": "2. Add to cart", "text": "Pick quantities and review your total before you commit to anything." },
-      { "icon": "chat", "title": "3. Message us", "text": "Tap Order via Telegram and paste your cart into the chat." },
-      { "icon": "pen", "title": "4. Confirm", "text": "We confirm the details with you directly and take it from there." }
+      {
+        "icon": "grid",
+        "title": "1. Browse",
+        "text": "Look through the catalog and open any product to see what is included."
+      },
+      {
+        "icon": "cart",
+        "title": "2. Add to cart",
+        "text": "Pick quantities and review your total before you commit to anything."
+      },
+      {
+        "icon": "chat",
+        "title": "3. Message us",
+        "text": "Tap Order via Telegram and paste your cart into the chat."
+      },
+      {
+        "icon": "pen",
+        "title": "4. Confirm",
+        "text": "We confirm the details with you directly and take it from there."
+      }
     ]
   },
   "support": {
@@ -90,19 +137,48 @@
     "eyebrow": "FAQ",
     "heading": "Frequently asked questions",
     "items": [
-      { "q": "How do I order?", "a": "Add what you want to your cart, tap Order via Telegram and paste your cart into the chat. We confirm the details with you directly." }
+      {
+        "q": "How do I order?",
+        "a": "Add what you want to your cart, tap Order via Telegram and paste your cart into the chat. We confirm the details with you directly."
+      }
     ]
   },
   "footer": {
     "about": "Browse, add to cart and order through Telegram.",
     "columns": [
-      { "title": "Store", "links": [ { "label": "Products", "href": "#catalog" }, { "label": "How it works", "href": "#why" } ] },
-      { "title": "Contact", "links": [ { "label": "Telegram", "href": "{telegram}" }, { "label": "Support", "href": "#support" } ] }
+      {
+        "title": "Store",
+        "links": [
+          {
+            "label": "Products",
+            "href": "#catalog"
+          },
+          {
+            "label": "How it works",
+            "href": "#why"
+          }
+        ]
+      },
+      {
+        "title": "Contact",
+        "links": [
+          {
+            "label": "Telegram",
+            "href": "{telegram}"
+          },
+          {
+            "label": "Support",
+            "href": "#support"
+          }
+        ]
+      }
     ],
     "legal": "© wGB◇. All rights reserved."
   },
   "products": {
     "order": [],
     "overrides": {}
-  }
+  },
+  "version": 1,
+  "updated": "2026-11-27T12:00:01.163Z"
 }
