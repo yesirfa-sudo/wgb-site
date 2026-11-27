@@ -1,8 +1,8 @@
 {
   "brand": {
-    "name": "wGB◇",
+    "name": "wGB ",
     "mark": "◇",
-    "sub": "Digital products"
+    "sub": "NFA Account"
   },
   "seo": {
     "title": "wGB◇ | Digital products",
@@ -12,11 +12,11 @@
   "colors": {
     "bg": "#060709",
     "bg2": "#0b0d11",
-    "panel": "#0f1217",
+    "panel": "#122a4f",
     "panel2": "#151921",
     "text": "#f4f5f7",
-    "muted": "#8c93a1",
-    "soft": "#b7bcc8",
+    "muted": "#00ccff",
+    "soft": "#e0f7fa",
     "silverTop": "#ffffff",
     "silverMid": "#e9ecf2",
     "silverBottom": "#8d95a6",
@@ -50,9 +50,9 @@
     "searchPlaceholder": "Search products"
   },
   "hero": {
-    "line1": "Level up",
-    "line2": "your loadout",
-    "text": "Browse the wGB◇ catalog, pick what you need, and finish your order with us in Telegram.",
+    "line1": "Real quality",
+    "line2": "Highly vouched",
+    "text": "No other NFA seller can match our quality \n                 GUARENTEED",
     "primaryButton": "Browse products →",
     "secondaryButton": "Message on Telegram"
   },
@@ -180,5 +180,5 @@
     "overrides": {}
   },
   "version": 1,
-  "updated": "2026-11-27T12:01:38.625Z"
+  "updated": "2026-11-27T14:06:52.299Z"
 }
