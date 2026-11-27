@@ -6,7 +6,7 @@
   },
   "seo": {
     "title": "wGB◇ | Digital products",
-    "description": "Browse the wGB◇ catalog and order through Telegram."
+    "description": "Browse the wGB◇ catalog and order through Telegram. (admin test)"
   },
   "telegram": "https://t.me/AlphaTest3",
   "colors": {
@@ -180,5 +180,5 @@
     "overrides": {}
   },
   "version": 1,
-  "updated": "2026-11-27T12:00:01.163Z"
+  "updated": "2026-11-27T12:00:44.859Z"
 }
